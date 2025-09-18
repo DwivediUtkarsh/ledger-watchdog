@@ -4,7 +4,6 @@ import { TransactionTable } from "@/components/transactions/TransactionTable";
 import { TransactionDrawer } from "@/components/transactions/TransactionDrawer";
 import { FlagModal } from "@/components/transactions/FlagModal";
 import { FilterPanel } from "@/components/transactions/FilterPanel";
-import { UserStatsCard } from "@/components/user/UserStatsCard";
 import { MiniLeaderboard } from "@/components/user/MiniLeaderboard";
 import { Tx, FilterState, FlagInput } from "@/types";
 import { fetchTransactions, mockUser } from "@/lib/mockData";
@@ -148,7 +147,6 @@ const Index = () => {
             onFiltersChange={handleFiltersChange}
             onReset={handleResetFilters}
           />
-          <UserStatsCard user={mockUser} />
           <MiniLeaderboard />
         </div>
 
