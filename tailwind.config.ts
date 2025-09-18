@@ -47,21 +47,31 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        // SOC-specific risk colors
+        risk: {
+          low: "hsl(var(--risk-low))",
+          medium: "hsl(var(--risk-medium))",
+          high: "hsl(var(--risk-high))",
+          critical: "hsl(var(--risk-critical))",
+        },
+        // Tier colors for gamification
+        tier: {
+          bronze: "hsl(var(--bronze))",
+          silver: "hsl(var(--silver))",
+          gold: "hsl(var(--gold))",
+          platinum: "hsl(var(--platinum))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        mono: ["JetBrains Mono", "Fira Code", "Consolas", "monospace"],
+      },
+      backdropBlur: {
+        xs: "2px",
       },
       keyframes: {
         "accordion-down": {
@@ -80,10 +90,21 @@ export default {
             height: "0",
           },
         },
+        "pulse-ring": {
+          "0%": {
+            transform: "scale(1)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "scale(1.2)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-ring": "pulse-ring 1.5s ease-out infinite",
       },
     },
   },
