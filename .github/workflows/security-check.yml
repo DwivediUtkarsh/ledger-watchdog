@@ -1,0 +1,79 @@
+name: Security Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Full history for secret scanning
+    
+    - name: Check for sensitive files
+      run: |
+        echo "Checking for sensitive files..."
+        if find . -name ".env" -not -path "*/node_modules/*" -not -name "*.example" | grep -q .; then
+          echo "❌ Error: .env files found in repository!"
+          find . -name ".env" -not -path "*/node_modules/*" -not -name "*.example"
+          exit 1
+        fi
+        
+        if find . -name "*.db" -not -path "*/node_modules/*" | grep -q .; then
+          echo "❌ Error: Database files found in repository!"
+          find . -name "*.db" -not -path "*/node_modules/*"
+          exit 1
+        fi
+        
+        if find . -name "*.pem" -o -name "*.key" -not -path "*/node_modules/*" | grep -q .; then
+          echo "❌ Error: Private key files found in repository!"
+          find . -name "*.pem" -o -name "*.key" -not -path "*/node_modules/*"
+          exit 1
+        fi
+        
+        echo "✅ No sensitive files found"
+    
+    - name: Scan for hardcoded secrets
+      run: |
+        echo "Scanning for potential secrets in code..."
+        
+        # Check for common secret patterns
+        if git grep -iE '(api[_-]?key|secret[_-]?key|private[_-]?key).*["\x27][a-zA-Z0-9]{20,}["\x27]' -- '*.ts' '*.js' '*.tsx' '*.jsx'; then
+          echo "⚠️  Warning: Potential hardcoded secrets detected!"
+          echo "Please review the above matches"
+          exit 1
+        fi
+        
+        # Check for Bearer tokens
+        if git grep -E 'Bearer [a-zA-Z0-9_-]{20,}' -- '*.ts' '*.js' '*.tsx' '*.jsx'; then
+          echo "⚠️  Warning: Potential Bearer tokens detected!"
+          exit 1
+        fi
+        
+        echo "✅ No hardcoded secrets detected"
+    
+    - name: Verify gitignore
+      run: |
+        echo "Verifying .gitignore configuration..."
+        
+        required_patterns=(
+          ".env"
+          "*.db"
+          "*.pem"
+          "*.key"
+        )
+        
+        for pattern in "${required_patterns[@]}"; do
+          if ! grep -q "$pattern" .gitignore; then
+            echo "❌ Error: .gitignore missing pattern: $pattern"
+            exit 1
+          fi
+        done
+        
+        echo "✅ .gitignore properly configured"
+

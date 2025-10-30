@@ -1,0 +1,115 @@
+// Prisma schema for Ledger Watchdog
+// Database: SQLite (for development) / PostgreSQL (for production)
+// ORM: Prisma 5.7+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Core transaction model - represents USDT transfers on Solana
+model Transaction {
+  // Primary identifiers
+  id        String   @id @default(cuid())
+  sig       String   @unique // Solana signature length
+  
+  // Transaction metadata
+  tsISO     DateTime // Transaction timestamp
+  slot      BigInt?  // Solana slot number
+  status    String   @default("confirmed") // "pending", "confirmed", "failed"
+  
+  // Transfer details
+  from         String  // Solana address
+  to           String  // Solana address
+  amountUSDT   Float   // Token amount (using Float for SQLite compatibility)
+  
+  // Risk assessment
+  risk         Int     @default(0) // 0-100 risk score
+  riskFactors  String  @default("[]") // JSON array of risk indicators
+  
+  // Classification and metadata
+  labels       String  @default("[]") // JSON array: ["mixer", "cex", "bridge"]
+  hints        String  @default("[]") // JSON array: analysis hints for UI
+  
+  // Additional context (stored as JSON string)
+  metadata     String? // JSON string for additional data
+  
+  // Audit fields
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  flags        Flag[]
+  
+  @@map("transactions")
+}
+
+// Flag model - user-submitted reports on suspicious transactions
+model Flag {
+  // Primary identifiers
+  id           String   @id @default(cuid())
+  txSig        String
+  
+  // Flag classification
+  category     String   // "Phishing", "Mixer", etc.
+  severity     String   // "low", "medium", "high"
+  confidence   Int      // 10-100 confidence level
+  
+  // User analysis
+  notes        String   // Free-form description (min 20 chars)
+  evidenceUrls String   @default("[]") // JSON array of supporting evidence links
+  
+  // Flag lifecycle
+  status       String   @default("pending") // "pending", "accepted", "rejected", "disputed"
+  reviewedAt   DateTime?
+  reviewedBy   String?  // Reviewer identifier
+  reviewNotes  String?
+  
+  // Attribution (simplified for now - no auth system yet)
+  reporterHandle    String?
+  reporterVerified  Boolean  @default(false)
+  reporterIP        String?  // For basic spam prevention
+  
+  // Gamification (placeholder for future)
+  pointsAwarded     Int?
+  
+  // Audit fields
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  transaction  Transaction @relation(fields: [txSig], references: [sig], onDelete: Cascade)
+  
+  @@map("flags")
+}
+
+// Ingestion tracking - keeps track of processed blocks/signatures
+model IngestionCursor {
+  id          String   @id @default(cuid())
+  source      String   @unique // "helius_webhook", "rpc_polling", etc.
+  lastSlot    BigInt?  // Last processed Solana slot
+  lastSig     String?  // Last processed signature
+  lastRunAt   DateTime @default(now())
+  isActive    Boolean  @default(true)
+  metadata    String?  // JSON string for source-specific metadata
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("ingestion_cursors")
+}
+
+// System health and metrics (optional)
+model SystemMetric {
+  id        String   @id @default(cuid())
+  metric    String   // "transactions_ingested", "flags_submitted"
+  value     Float
+  tags      String?  // JSON string for additional metric tags
+  timestamp DateTime @default(now())
+  
+  @@map("system_metrics")
+}

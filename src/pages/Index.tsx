@@ -6,7 +6,9 @@ import { FlagModal } from "@/components/transactions/FlagModal";
 import { FilterPanel } from "@/components/transactions/FilterPanel";
 import { MiniLeaderboard } from "@/components/user/MiniLeaderboard";
 import { Tx, FilterState, FlagInput } from "@/types";
-import { fetchTransactions, mockUser } from "@/lib/mockData";
+import { fetchTransactions } from "@/lib/api";
+import { mockUser } from "@/lib/mockData";
+import { config } from "@/lib/config";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -27,12 +29,26 @@ const Index = () => {
   const loadTransactions = useCallback(async () => {
     setLoading(true);
     try {
-      const txs = await fetchTransactions(filters);
+      // Fetch recent USDT transactions with reasonable limits for live feed
+      const txs = await fetchTransactions({
+        ...filters,
+        limit: config.liveFeed.defaultLimit,
+        lookback: config.liveFeed.defaultLookback,
+      });
       setTransactions(txs);
+      
+      // Show info if no transactions found
+      if (txs.length === 0) {
+        toast({
+          title: "No recent transactions",
+          description: "No USDT transfers found in the last 24 hours. The feed will update every 30 minutes.",
+        });
+      }
     } catch (error) {
+      console.error('Failed to load transactions:', error);
       toast({
         title: "Failed to load transactions",
-        description: "Please try again later",
+        description: "Unable to fetch live USDT transactions. Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
@@ -42,6 +58,15 @@ const Index = () => {
 
   useEffect(() => {
     loadTransactions();
+  }, [loadTransactions]);
+
+  // Auto-refresh for live feed
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadTransactions();
+    }, config.liveFeed.refreshInterval);
+
+    return () => clearInterval(interval);
   }, [loadTransactions]);
 
   // Handlers
@@ -155,9 +180,15 @@ const Index = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold">Transaction Feed</h1>
+                <h1 className="text-2xl font-bold">Live USDT Transaction Feed (24h)</h1>
                 <p className="text-muted-foreground">
                   {loading ? "Loading..." : `${transactions.length} transactions found`}
+                  {!loading && (
+                    <span className="ml-2 inline-flex items-center">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1"></span>
+                      Live (updates every 30 min)
+                    </span>
+                  )}
                 </p>
               </div>
             </div>

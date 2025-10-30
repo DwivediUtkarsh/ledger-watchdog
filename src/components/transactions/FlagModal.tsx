@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/select";
 import { Flag, Plus, X, AlertTriangle, Star, Coins } from "lucide-react";
 import { Tx, FlagInput, calculatePoints } from "@/types";
-import { mockUser, submitFlag } from "@/lib/mockData";
+import { submitFlag } from "@/lib/api";
+import { mockUser } from "@/lib/mockData";
 import { useToast } from "@/hooks/use-toast";
 
 interface FlagModalProps {

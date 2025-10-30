@@ -12,6 +12,19 @@ dist
 dist-ssr
 *.local
 
+# Environment variables
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/env.example
+
+# Database
+*.db
+*.db-journal
+dev.db
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +35,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets and keys
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+.secrets

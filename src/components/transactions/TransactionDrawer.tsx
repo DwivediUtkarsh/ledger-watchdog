@@ -16,7 +16,8 @@ import {
   EyeOff
 } from "lucide-react";
 import { Tx, getRiskColor } from "@/types";
-import { fetchTransactionDetails, mockUser } from "@/lib/mockData";
+import { fetchTransactionDetails } from "@/lib/api";
+import { mockUser } from "@/lib/mockData";
 import { formatDistanceToNow } from "date-fns";
 
 interface TransactionDrawerProps {
