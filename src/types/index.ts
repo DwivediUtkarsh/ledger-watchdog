@@ -1,4 +1,4 @@
-// Cerberus SOC Types - Transaction analysis and flagging system
+// Ledger Watchdog Types - Transaction monitoring and flagging system
 
 export type Tx = {
   sig: string;

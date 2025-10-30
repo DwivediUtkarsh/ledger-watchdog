@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Cerberus SOC Design System - Dark professional theme for analyst workbench */
+/* Ledger Watchdog Design System - Dark professional theme for transaction monitoring */
 
 @layer base {
   :root {

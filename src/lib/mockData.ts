@@ -1,4 +1,4 @@
-// Mock data for Cerberus SOC - USDT transactions on Solana
+// Mock data for Ledger Watchdog - USDT transactions on Solana
 
 import { Tx, User, LeaderboardEntry, FlagReport, FlagInput, calculatePoints } from "@/types";
 
